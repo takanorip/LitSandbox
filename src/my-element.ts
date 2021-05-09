@@ -1,69 +1,45 @@
-/**
- * @license
- * Copyright (c) 2019 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
- */
+import {LitElement, html, css} from 'lit';
+import {customElement} from 'lit/decorators.js';
+import {ref, createRef} from 'lit/directives/ref.js';
 
-import {LitElement, html, customElement, property, css} from 'lit-element';
+const loremIpsum = Array(100).fill(0).map(() => 'Lorem ipsum dolor sit amet.').join(' ');
 
-/**
- * An example element.
- *
- * @slot - This element has a slot
- * @csspart button - The button
- */
 @customElement('my-element')
 export class MyElement extends LitElement {
+
   static styles = css`
-    :host {
-      display: block;
-      border: solid 1px gray;
-      padding: 16px;
-      max-width: 800px;
+    .scroll {
+      height: 100px;
+      overflow: auto;
+      padding: 10px;
+      border: 1px solid gray;
     }
   `;
 
-  /**
-   * The name to say "Hello" to.
-   */
-  @property()
-  name = 'World';
-
-  /**
-   * The number of times the button has been clicked.
-   */
-  @property({type: Number})
-  count = 0;
+  private inputRef = createRef<HTMLInputElement>();
 
   render() {
     return html`
-      <h1>Hello, ${this.name}!</h1>
-      <button @click=${this._onClick} part="button">
-        Click Count: ${this.count}
-      </button>
-      <slot></slot>
+      Passing ref directive a Ref object that will hold the element in .value:<br>
+      <input ${ref(this.inputRef)}>
+
+      <hr>
+
+      Passing ref directive a change callback
+      <div class="scroll">
+        ${loremIpsum}
+        <p ${ref(this.ensureInView)}>Scrolled into view!</p>
+        ${loremIpsum}
+      </div>
     `;
   }
 
-  private _onClick() {
-    this.count++;
+  firstUpdated() {
+    const input = this.inputRef.value!;
+    input.focus();
   }
 
-  foo(): string {
-    return 'foo';
-  }
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'my-element': MyElement;
+  ensureInView(element: Element | undefined) {
+    requestAnimationFrame(() => element!.scrollIntoView(true));
   }
 }
